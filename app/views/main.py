@@ -1,9 +1,10 @@
 from flask import Flask,render_template, make_response, request, session, redirect, flash, Blueprint
 from flask_script import Manager
 from flask_bootstrap import Bootstrap
-from datetime import datetime
+from datetime import datetime, timedelta
 import json
 import base64
+from calendar import monthrange
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 
 from app.models.organization import Organization
@@ -13,6 +14,16 @@ from app.models.user import User
 from app import rackhd_config
 
 main = Blueprint('main', __name__)
+
+def tool_time_range_preprocessing(startDate, endDate):
+    if type(startDate) == type(""):
+        startDate = datetime.strptime(startDate, "%Y-%m")
+    if type(endDate) == type(""):
+        endDate = datetime.strptime(endDate, "%Y-%m")
+        days_of_month = monthrange(endDate.year, endDate.month)[1]
+        endDate = endDate + timedelta(days_of_month, 0)
+    print(startDate, endDate)
+    return (startDate, endDate)
 
 @main.route("/index.html", methods=['GET'])
 @main.route("/index", methods=['GET'])
@@ -26,58 +37,54 @@ def global_info():
 	
 @main.route("/get_global_image", methods=['POST'] )
 def get_global_image():
-    startDate = request.form['StartDate'] or '2015-10-01'
+    startDate = request.form['StartDate'] or '2015-10'
     endDate = request.form['EndDate'] or datetime.now()
+    startDate, endDate = tool_time_range_preprocessing(startDate, endDate)
+
     image_name = request.form['image_name']
+    
     org = Organization()
-
-    if type(startDate) == type(""):
-        startDate = datetime.strptime(startDate, "%Y-%m-%d")
-    if type(endDate) == type(""):
-        endDate = datetime.strptime(endDate, "%Y-%m-%d")
-
-    #print("startDate %s, endDate: %s" % (startDate,endDate)	)
-
-    operator = {'image1': org.draw_pr_count_monthly(startDate, endDate),
-                'image2': org.draw_comments_monthly(startDate, endDate)}
+    operator = {'prCountsHead': org.draw_pr_count_monthly(startDate, endDate),
+                'externalPrCountsHead': org.draw_external_pr_count_monthly(startDate, endDate),
+                'reviewCommentsHead': org.draw_comments_monthly(startDate, endDate)}
     image_output = operator[image_name]
     image = base64.b64encode(image_output).decode('UTF-8')
     return make_response(image)  
-	
+
 @main.route("/team_info", methods=['GET'])
 def team_info():
     team_name = 'Maglev Team'
-    return render_template('team_info.html', teamName = team_name)
+    teams = [k for k in rackhd_config.Teams.keys()]
+    return render_template('team_info.html', teamName = team_name, teams=teams)
 
-@main.route("/get_team_image", methods=['POST'] )
+@main.route("/get_team_image", methods=['POST'])
 def get_team_image():
     teams = rackhd_config.Teams
     repo = rackhd_config.repos    
-    team_name = request.form['TeamName'] or 'Maglev Team'
-    startDate = request.form['StartDate'] or '2015-10-01'
+
+    startDate = request.form['StartDate'] or '2015-10'
     endDate = request.form['EndDate'] or datetime.now()
-    image_name = request.form['image_name']    
-    if type(startDate) == type(""):
-        startDate = datetime.strptime(startDate, "%Y-%m-%d")
-    if type(endDate) == type(""):
-        endDate = datetime.strptime(endDate, "%Y-%m-%d")
-    team_members = teams[team_name]	
-    #print("startDate %s, endDate: %s" % (startDate,endDate)	)
-    t = Team(team_name, team_members)	
-    operator = {'image1': t.draw_team_pr_count_monthly(startDate, endDate),
-                'image2': t.draw_team_comments_count_monthly(startDate, endDate),
-                'image3': t.draw_team_avg_duration_monthly(startDate, endDate),
-				'image4': t.draw_pr_count_member(startDate, endDate),
-                'image5': t.draw_comments_count_member(startDate, endDate),
-                'image6': t.draw_avg_duration_member(startDate, endDate)}
+    startDate, endDate = tool_time_range_preprocessing(startDate, endDate)
+    image_name = request.form['image_name']
+
+    team_name = request.form['TeamName'] or 'Maglev Team'
+    team_members = teams[team_name]
+
+    t = Team(team_name, team_members)
+    operator = {'teamPrCountsHead': t.draw_team_pr_count_monthly(startDate, endDate),
+                'teamReviewCommentsHead': t.draw_team_comments_count_monthly(startDate, endDate),
+                'teamPRAvgDurationHead': t.draw_team_avg_duration_monthly(startDate, endDate),
+                'memberPRCountsHead': t.draw_pr_count_member(startDate, endDate),
+                'memberReviewCommentsHead': t.draw_comments_count_member(startDate, endDate),
+                'memberPRAvgDurationHead': t.draw_avg_duration_member(startDate, endDate)}
     image_output = operator[image_name]
     image = base64.b64encode(image_output).decode('UTF-8')
-    return make_response(image)  
-	
+    return make_response(image)
+
 @main.route("/personal_info", methods=['GET'])
 def personal_info(): 
-    userName = 'panpan0000' 
-    return render_template('personal_info.html', userName = userName)
+    teams_users = rackhd_config.Teams
+    return render_template('personal_info.html', teams_users = teams_users)
 
 @main.route("/get_user_info", methods=['POST'])
 def get_user_info():
@@ -85,23 +92,20 @@ def get_user_info():
     repo = rackhd_config.repos
     teamName = request.form['TeamName']
     user = request.form['UserName']
+
     startDate = request.form['StartDate']
     endDate = request.form['EndDate']	    
-    if startDate is "":
-        startDate = datetime.strptime('2015-10-01T00:00:00Z', "%Y-%m-%dT%H:%M:%SZ")
-    if endDate is "":
-        endDate = datetime.now()    
-    if teamName is "":
-        teamName = 'Maglev Team'
-    if user is "":
-        user = "panpan0000"
+    startDate = request.form['StartDate'] or '2015-10'
+    endDate = request.form['EndDate'] or datetime.now()
+    startDate, endDate = tool_time_range_preprocessing(startDate, endDate)
+
     team_members = teams[teamName]
-#    print(team_members)
     u = User(user, teamName)
     user_data = {}
     user_data['pr_rank'] = u.get_pr_rank(startDate, endDate)
     user_data['comments_rank'] = u.get_comments_rank(startDate, endDate)
     user_data['three_top_review_to'] = u.get_three_top_review_to(startDate, endDate)
     user_data['three_top_review_from'] = u.get_three_top_review_from(startDate, endDate)
-
+    # to be replaced by db
+    user_data['avatar_url'] = u.get_avatar_url(rackhd_config.headers)
     return make_response(json.dumps(user_data))

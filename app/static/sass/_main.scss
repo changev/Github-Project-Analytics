@@ -1,0 +1,110 @@
+@mixin centre($axis: "both"){
+    position:absolute;
+    @if $axis == "y"{
+        top:50%;
+        -webkit-transform: translateY(-50%);
+        -moz-transform: translateY(-50%);
+        -ms-transform: translateY(-50%);
+        -o-transform: translateY(-50%);
+        transform: translateY(-50%);
+    }
+    @if $axis == "x"{
+        left:50%;
+        -webkit-transform: translateX(-50%);
+        -moz-transform: translateX(-50%);
+        -ms-transform: translateX(-50%);
+        -o-transform: translateX(-50%);
+        transform: translateX(-50%);
+    }
+    @if $axis == "both"{
+        top:50%;
+        left:50%;
+        -webkit-transform: translate(-50%, -50%);
+        -moz-transform: translate(-50%, -50%);
+        -ms-transform: translate(-50%, -50%);
+        -o-transform: translate(-50%, -50%);
+        transform: translate(-50%, -50%);
+    }   
+}
+
+.navbar-text {
+    &.page-hearder{
+        font-size: 16px;
+        color: white;
+        font-weight: 600;
+        margin: 0px 10px;
+        padding: 15px 10px;
+        background: #474747;
+    }
+}
+
+.nav-grey {
+    li{
+        &.active{
+            a{
+                background: #474747;
+                &:focus,
+                &:hover{
+                    background: #474747;
+                }
+            }
+        }
+        a{
+            background:#2b2a30;
+            color: white;
+            border-radius:0px;
+            &:focus{
+                color: coral;
+                background: #2b2a30;
+                border-bottom: 4px solid coral;
+            }
+            &:hover{
+                color: coral;
+                background: #2b2a30;
+                border-bottom: 4px solid coral;
+            }
+        }
+    }
+}
+
+.form-grey{
+    border: 2px solid #474747;
+    height: 38px;
+    font-weight: 600;
+    border-radius: 0px;
+}
+
+.btn-submit{
+    &.active{
+        font-weight: 600;
+        color: white;
+        background: #474747;
+        border: 0px;
+        &:focus,
+        &:hover{
+            background: #474747;
+            border: 0px;
+        }
+    }
+    font-weight: 600;
+    background:#2b2a30;
+    color: white;
+    height: 38px;
+    width: auto;
+    border-radius:0px;
+    &:focus{
+        color: coral;
+        background: #2b2a30;
+        border-bottom: 4px solid coral;
+    }
+    &:hover{
+        color: coral;
+        background: #2b2a30;
+        border-bottom: 4px solid coral;
+    }
+}
+
+.dropdown-grey{
+    @extend .nav-grey;
+    background: #2b2a30;
+}

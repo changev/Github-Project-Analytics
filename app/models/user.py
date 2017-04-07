@@ -50,14 +50,14 @@ class User(object):
             select_sql = ' '.join(items)            
             #print(select_sql)                
             result = self.db.getResult(select_sql)
-            if result[0][0] == None:
+            if not result :
                 print("result is None. Select sql may be wrong!")
+                return
             for line in result:
                 if line[0] == self.name:
                     user_info = line
                     break
-            beat_rank = round(result.index(user_info)/len(result)*100, 2)    
-            #print(beat_rank)
+            beat_rank = round((result.index(user_info)+1)/len(result)*100, 2)
             return beat_rank
         except Exception as e:
             print ("Error: %s" % e)
@@ -90,13 +90,14 @@ class User(object):
             select_sql = ' '.join(items)            
             #print(select_sql)                
             result = self.db.getResult(select_sql)
-            if result[0][0] == None:
+            if not result:
                 print("result is None. Comments Table is Null. Or select sql may be wrong!")
+                return
             for line in result:
                 if line[0] == self.name:
                     user_info = line
                     break
-            beat_rank = round(result.index(user_info)/len(result)*100, 2)    
+            beat_rank = round((result.index(user_info)+1)/len(result)*100, 2)    
             #print(beat_rank)
             return beat_rank
         except Exception as e:
@@ -321,3 +322,13 @@ class User(object):
                 return result        
         except Exception as e:
             print ("Error: %s" % e)
+
+    def get_avatar_url(self, headers):
+        # to be replaced by db
+        import requests
+        url="https://api.github.com/users/{0}".format(self.name)
+        r = requests.get(url, headers = headers)
+        if r.ok:
+            return r.json()["avatar_url"]
+        else:
+            return "#"

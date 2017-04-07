@@ -1,0 +1,40 @@
+@import "_main";
+#monthRangePicker {
+    width: 100%;
+    margin: 8px 0px;
+}
+
+#datepicker {
+    width: 100%;
+}
+
+.panel-heading {
+    padding-top: 5px;
+    padding-bottom: 5px;
+    img{
+        height: 39px;
+        width: auto;
+        border-radius: 20px;
+    }
+}
+
+.text-right,
+.text-left{
+    padding: 0px 0px;
+}
+
+.panel-body{
+    color: darkslategrey;
+    font-size: 16px;
+    .left-border{
+        border-left: solid 1px grey;
+        height: 100%;
+    }
+    .important{
+        font-size: 40px;
+        color: steelblue;
+    }
+    .strking{
+        color: steelblue;
+    }
+}

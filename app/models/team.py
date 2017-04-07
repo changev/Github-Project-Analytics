@@ -7,6 +7,10 @@ from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
 from app.models.user import User
 from app.sqlite import SQLiteDB
 
+def get_sort_key(datetuple):
+    ym = datetuple[0].split("-")
+    return int(ym[0])*100 + int(ym[1])
+
 class Team(object):
     """
     """
@@ -35,7 +39,7 @@ class Team(object):
             datelist.append((startDate, endDate))
         else:
             datetime1 = startDate
-            while datetime1 < endDate:            
+            while datetime1 < endDate:
                 q, r = divmod(datetime1.month, 12)
                 datetime2 = datetime.datetime(datetime1.year+q, r+1, 1)
                 if datetime2 < endDate:
@@ -45,7 +49,7 @@ class Team(object):
                 datetime1 = datetime2
         return datelist
    
-    def get_pr_count_monthly(self, startDate, endDate, repos=None, isMerged=None):
+    def get_pr_count_monthly(self, startDate, endDate, repos=None, isMerged=None, debug=False):
         """get pr count monthly
         args:
             startDate: 
@@ -54,6 +58,7 @@ class Team(object):
         return:
             (month, count)  
         """
+        user_dict=dict()
         count_monthly = {}
         datelist = self.datetime_offset_by_month(startDate, endDate)
         for datetuple in datelist:  
@@ -61,8 +66,14 @@ class Team(object):
             count_monthly[key] = 0
             for user in self.team_members:
                 count_monthly[key] += user.get_pr_count(datetuple[0], datetuple[1], repos, isMerged)
-        month, count = zip(*sorted(count_monthly.items(), key = lambda x: x[0], reverse = False))        
-        return month, count            
+                if user.name in user_dict.keys():
+                    user_dict[user.name] += user.get_pr_count(datetuple[0], datetuple[1], repos, isMerged)
+                else:
+                    user_dict[user.name] = user.get_pr_count(datetuple[0], datetuple[1], repos, isMerged)
+        if debug:
+            print(user_dict)
+        month, count = zip(*sorted(count_monthly.items(), key = get_sort_key, reverse = False))        
+        return month, count
              
     def get_comments_count_monthly(self, startDate, endDate, repos=None):
         """get Team Review comments count monthly
@@ -80,8 +91,8 @@ class Team(object):
             count_monthly[key] = 0
             for user in self.team_members:
                 count_monthly[key] += user.get_comments_count(datetuple[0], datetuple[1], repos)
-        month, count = zip(*sorted(count_monthly.items(), key = lambda x: x[0], reverse = False))       
-        return month, count        
+        month, count = zip(*sorted(count_monthly.items(), key = get_sort_key, reverse = False))   
+        return month, count    
      
     def get_avg_duration_monthly(self, startDate, endDate, repos=None):
         """get all team prs' average duration monthly
@@ -105,7 +116,7 @@ class Team(object):
                 continue
             duration_monthly[key] = round(sum(durations) / len(durations) , 2)
         if duration_monthly:
-            month, duration_list = zip(*sorted(duration_monthly.items(), key = lambda x: x[0], reverse = False))
+            month, duration_list = zip(*sorted(duration_monthly.items(), key = get_sort_key, reverse = False))
             return month, duration_list
         else:
             return (),()

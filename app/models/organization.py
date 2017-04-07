@@ -59,18 +59,18 @@ class Organization(object):
         month, rackhd_created_count = self.rackhd.get_pr_count_monthly(startDate, endDate, repos)
         _, rackhd_merged_count = self.rackhd.get_pr_count_monthly(startDate, endDate, repos, isMerged=True)
         _, rackhd_unmerged_count = self.rackhd.get_pr_count_monthly(startDate, endDate, repos, isMerged=False)        
-        _, no_rackhd_created_count = self.no_rackhd.get_pr_count_monthly(startDate, endDate, repos)
+        _, no_rackhd_created_count = self.no_rackhd.get_pr_count_monthly(startDate, endDate, repos, debug=True)
         _, no_rackhd_merged_count = self.no_rackhd.get_pr_count_monthly(startDate, endDate, repos, isMerged=True)
         _, no_rackhd_unmerged_count = self.no_rackhd.get_pr_count_monthly(startDate, endDate, repos, isMerged=False)
         ind = np.linspace(0.5, 9.5, len(month))
 #        y_ind = range(0, max(rackhd_created_count)+200, 100)
         fig, ax = plt.subplots(figsize = (12, 6))
-        plt.plot(ind, rackhd_created_count, 'r--^', linewidth=1, label='rackhd create pr count')
-        plt.plot(ind, rackhd_merged_count, 'r-*', linewidth=1, label='rackhd merged pr count')
-        plt.plot(ind, rackhd_unmerged_count, 'r-.o', linewidth=1, label='rackhd unmerged pr count')
-        plt.plot(ind, no_rackhd_created_count, 'c--^', linewidth=1, label='norackhd create pr count')
-        plt.plot(ind, no_rackhd_merged_count, 'c-*', linewidth=1, label='norackhd merged pr count')
-        plt.plot(ind, no_rackhd_unmerged_count, 'c-.o', linewidth=1, label='norackhd unmerged pr count')
+        plt.plot(ind, rackhd_created_count, 'r--^', linewidth=1, label='internal created pr count')
+        plt.plot(ind, rackhd_merged_count, 'r-*', linewidth=1, label='internal merged pr count')
+        plt.plot(ind, rackhd_unmerged_count, 'r-.o', linewidth=1, label='internal unmerged pr count')
+        plt.plot(ind, no_rackhd_created_count, 'c--^', linewidth=1, label='community created pr count')
+        plt.plot(ind, no_rackhd_merged_count, 'c-*', linewidth=1, label='community merged pr count')
+        plt.plot(ind, no_rackhd_unmerged_count, 'c-.o', linewidth=1, label='community unmerged pr count')
         plt.xticks(ind, month, rotation=30)
 #        plt.yticks(y_ind)
         plt.xlabel('Month')
@@ -83,6 +83,34 @@ class Organization(object):
         canvas.print_png(png_output)
         return png_output.getvalue()
     
+    def draw_external_pr_count_monthly(self, startDate, endDate, repos=None):
+        """ 1.1 draw pr count monthly with rackhd and no-rackhd
+        args:
+            startDate: 
+            endDate:
+            repos: rackhd repository
+        """
+        month, no_rackhd_created_count = self.no_rackhd.get_pr_count_monthly(startDate, endDate, repos, debug=True)
+        _, no_rackhd_merged_count = self.no_rackhd.get_pr_count_monthly(startDate, endDate, repos, isMerged=True)
+        _, no_rackhd_unmerged_count = self.no_rackhd.get_pr_count_monthly(startDate, endDate, repos, isMerged=False)
+        ind = np.linspace(0.5, 9.5, len(month))
+#        y_ind = range(0, max(rackhd_created_count)+200, 100)
+        fig, ax = plt.subplots(figsize = (12, 6))
+        plt.plot(ind, no_rackhd_created_count, 'c--^', linewidth=1, label='community created pr count')
+        plt.plot(ind, no_rackhd_merged_count, 'c-*', linewidth=1, label='community merged pr count')
+        plt.plot(ind, no_rackhd_unmerged_count, 'c-.o', linewidth=1, label='community unmerged pr count')
+        plt.xticks(ind, month, rotation=30)
+#        plt.yticks(y_ind)
+        plt.xlabel('Month')
+        plt.ylabel('PR Count')
+        plt.title('PR Count Monthly')
+        plt.legend()
+
+        canvas=FigureCanvas(fig)
+        png_output = BytesIO()
+        canvas.print_png(png_output)
+        return png_output.getvalue()
+
     def draw_comments_monthly(self, startDate, endDate, repos=None):
         """ 1.2 draw review count monthly with rackhd and no-rackhd
         args:
@@ -95,8 +123,8 @@ class Organization(object):
         x_ind = np.linspace(0.5, 9.5, len(month))
         y_ind = range(0, max(rackhd_comments_count+no_rackhd_comments_count)+400, 100)
         fig, ax = plt.subplots(figsize = (12, 6))
-        plt.plot(x_ind, rackhd_comments_count, 'r--^', linewidth=1, label='rackhd comments count')
-        plt.plot(x_ind, no_rackhd_comments_count, 'c--^', linewidth=1, label='norackhd comments count')
+        plt.plot(x_ind, rackhd_comments_count, 'r--^', linewidth=1, label='internal comments count')
+        plt.plot(x_ind, no_rackhd_comments_count, 'c--^', linewidth=1, label='community comments count')
         plt.xticks(x_ind, month, rotation=30)
         plt.yticks(y_ind)
         plt.xlabel('Month')

@@ -1,0 +1,38 @@
+@import "_main";
+
+.bg {
+  background: url('../img/statistics-flat.png') no-repeat center center;
+  background-color: #1c1c1c;
+  position: fixed;
+  width: 100%;
+  height: 400px; /*same height as jumbotron */
+  top:0;
+  left:0;
+  z-index: -1;
+}
+
+.jumbotron {
+  margin-bottom: 0px;
+  height: 300px;
+  color: mintcream;
+  text-shadow: darkslategrey 0.3em 0.3em 0.3em;
+  background:transparent;
+}
+
+.board{
+  width:100%; 
+  min-height: 600px; 
+  background: #1c1c1c;
+  height: auto;
+  border-top: 1px solid #1c1b21;
+  padding-top: 50px;
+
+  .board-btn {
+    background-color: #2b2a30;
+    border-color: #2e2c35;
+    &:hover{
+      background-color: #474747;
+    }
+  }
+}
+

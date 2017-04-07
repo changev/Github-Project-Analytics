@@ -40,7 +40,7 @@ def iter_request_data(pr_url, headers):
 
         for d in data:
             yield d
- 
+
 def load_certain_period_data(url, headers, startDate, endDate): 
     """get pull request and comments statistics for a period of time 
     """
@@ -64,8 +64,8 @@ def load_certain_period_data(url, headers, startDate, endDate):
         # 根据pr_createDate和pr_endDate筛选pr
 
         if startDate< pr_endDate <= endDate or startDate<= pr_createDate < endDate:
-            print startDate, endDate
-            print pr_endDate, pr_createDate
+            print(startDate, endDate)
+            print(pr_endDate, pr_createDate)
             pull_request["id"] = pr["id"]             
             pull_request["user"] = pr["user"]["login"]
             pull_request["number"] = pr["number"]

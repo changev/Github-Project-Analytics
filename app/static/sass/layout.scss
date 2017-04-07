@@ -1,0 +1,17 @@
+@import "_main";
+
+img {
+  &.logo {
+      display: inline-block;
+      width: 100px;
+      height: auto;
+      @include centre(y);
+  }
+}
+
+.navbar-inverse{
+  background-color: #2b2a30;
+  border-color: #1c1b21;
+  margin: 0px;
+  border-radius: 0px;
+}
